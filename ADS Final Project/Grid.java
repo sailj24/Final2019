@@ -33,7 +33,7 @@ public class Grid {
 
     public Grid(int num) {
         this.bombNum = num;
-        this.gridAxis = 2 * this.bombNum;
+        this.gridAxis = this.bombNum + 5;
         this.gridSize = gridAxis * gridAxis;
         this.grid = new Square[gridAxis][gridAxis];
         makeGrid();
