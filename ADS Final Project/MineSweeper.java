@@ -5,12 +5,12 @@ import java.util.Random;
 public class MineSweeper {
 
     int counter; // counts down
-    int timer; // counts up
+    int timer; 
     Grid grid;
     boolean firstMove;
 
     public MineSweeper() { // default constructor calls parameterized constructor
-        this(21);
+        this(13);
     }
 
     public MineSweeper(int bombCount) { // parameterized constructor
@@ -48,25 +48,26 @@ public class MineSweeper {
     }
 
     public void computerPlay(Scanner scanner) {
-        ArrayList<Square> flags = new ArrayList<Square>();
         while (this.checkGameOver().equals("still alive")) {
-            this.grid.toString();
+            this.timer++;
+            /*this.grid.toString();
             System.out.println("Next Computer Move?");
             String hold = scanner.nextLine();
             if (hold.equals(" ")) {
-                System.out.println("ok");
-                this.decision(flags);
-            }
+                System.out.println("ok");*/
+                this.decision();
+                
         }
         if (this.checkGameOver().equals("died")) {
             this.died();
         } else if (this.checkGameOver().equals("won")) {
             this.won();
         }
+        System.out.println(this.timer + " moves");
     }
 
-    public void decision(ArrayList<Square> flagList) {
-        RetVal move = getMove(flagList);
+    public void decision() {
+        RetVal move = getMove();
         System.out.println(move.a + move.x + move.y);
         int[] actionPlace = { move.x, move.y };
         String action = move.a.toUpperCase();
@@ -74,7 +75,7 @@ public class MineSweeper {
         System.out.println("done");
     }
 
-    public RetVal getMove(ArrayList<Square> fList) {
+    public RetVal getMove() {
         // ...decision-making...
         if (this.firstMove) {
             return new RetVal((this.grid.gridAxis / 2), (this.grid.gridAxis / 2 + 1), "reveal");
@@ -93,22 +94,41 @@ public class MineSweeper {
         int[] place = new int[2];
         for (int i = 0; i <= this.grid.gridAxis - 1; i++) {
             for (int j = 0; j <= this.grid.gridAxis - 1; j++) {
-                if (this.grid.grid[i][j].chance > highest && this.grid.grid[i][j].revealed==0){
+                if (this.grid.grid[i][j].chance > highest && this.grid.grid[i][j].revealed == 0) {
                     highest = this.grid.grid[i][j].chance;
-                place[0] = i;
-                place[1] = j;
+                    place[0] = i;
+                    place[1] = j;
                 }
             }
         }
         if (highest > 0) {
             System.out.println(highest);
+            return new RetVal(place[0], place[1], "flag");
+
         }
-        /*
-         * Random random = new Random(); int x= random.nextInt(this.grid.gridAxis); int
-         * y= random.nextInt(this.grid.gridAxis); int b= random.nextInt(3); String
-         * a="REVEAL";
-         */
-        return new RetVal(place[0], place[1], "flag");
+        int lowest = 0;
+        if (highest <= 0) {
+            for (int i = 0; i <= this.grid.gridAxis - 1; i++) {
+                for (int j = 0; j <= this.grid.gridAxis - 1; j++) {
+                    if (this.grid.grid[i][j].chance < highest && this.grid.grid[i][j].revealed == 0) {
+                        lowest = this.grid.grid[i][j].chance;
+                        place[0] = i;
+                        place[1] = j;
+                    }
+                }
+            }
+        }
+        if (lowest < 0) {
+            System.out.println(lowest);
+            return new RetVal(place[0], place[1], "reveal");
+        } else {
+            Random random = new Random();
+            int x = random.nextInt(this.grid.gridAxis);
+            int y = random.nextInt(this.grid.gridAxis);
+            String a = "REVEAL";
+            return new RetVal(x, y, a);
+        }
+
     }
 
     class RetVal {
@@ -122,11 +142,13 @@ public class MineSweeper {
             a = act;
         }
     }
+
     public void lowChance(Square center) {
         for (Square next : center.connections) {
-            next.chance = next.chance-2;
+            next.chance = next.chance - 1;
         }
     }
+
     public void highChance(Square center) {
         for (Square next : center.connections) {
             next.chance += Character.getNumericValue(center.nature);
