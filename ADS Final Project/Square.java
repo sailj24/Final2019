@@ -6,6 +6,7 @@ public class Square {
     int revealed;
     ArrayList<Square> connections = new ArrayList<>();
     int neighborBombs;
+    int chance;
 
     public Square(char nat){
         nature = nat; //either bomb '*' or space ' '
@@ -15,6 +16,7 @@ public class Square {
                         //3 is ?ed
         connections = new ArrayList<Square>();
         neighborBombs = 0;
+        chance = 0;//only for the ai
     }
 
     public void changeAllBlankFriends(ArrayList<Square> visited){

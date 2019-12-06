@@ -7,15 +7,17 @@ public class MineSweeper {
     int counter; // counts down
     int timer; // counts up
     Grid grid;
+    boolean firstMove;
 
     public MineSweeper() { // default constructor calls parameterized constructor
         this(5);
     }
 
     public MineSweeper(int bombCount) { // parameterized constructor
-        counter = bombCount;
+        counter = bombCount-1;
         timer = 0;
         grid = new Grid(bombCount);
+        firstMove=true;
     }
 
     public void play(Scanner scanner) {
@@ -45,14 +47,15 @@ public class MineSweeper {
         }
     }
     
-     public void computerPlay(Scanner scanner) {
+    public void computerPlay(Scanner scanner) {
+        ArrayList<Square> flags = new ArrayList<Square>();
         while (this.checkGameOver().equals("still alive")) {
             this.grid.toString();
             System.out.println("Next Computer Move?");
             String hold = scanner.nextLine();
             if (hold.equals(" ")){
                 System.out.println("ok");
-                this.decision();
+                this.decision(flags);
             }
         }
         if (this.checkGameOver().equals("died")) {
@@ -61,31 +64,45 @@ public class MineSweeper {
             this.won();
         }
     }
-    public void decision(){
-        RetVal move = getMove();
+    public void decision(ArrayList<Square> flagList){
+        RetVal move = getMove(flagList);
         System.out.println(move.a + move.x + move.y);
         int[] actionPlace = {move.x,move.y};
-        String action = move.a;
+        String action = move.a.toUpperCase();
         this.adjustGrid(actionPlace, action); // adjustGrid int[], string -> void, adjusts grid
         System.out.println("done");
     }
-    public RetVal getMove(){
+    public RetVal getMove(ArrayList<Square> fList){
         //...decision-making...
+        if (this.firstMove){
+            return new RetVal((this.grid.gridAxis/2),(this.grid.gridAxis/2+1), "reveal");
+        }
         for (int i = 0; i<=this.grid.gridAxis-1; i++){
             for (int j = 0; j<=this.grid.gridAxis-1; j++){//for every real square
                 Square s = this.grid.grid[i][j];
-                if (s.connections.size()==s.neighborBombs){
-                    
-                }
-
-            }}
-
-        Random random = new Random();
+                if (s.revealed==1){
+                    this.highChance(s);
+            }}}
+            int highest = 0;
+            int[] place = new int[2];
+            for (int i = 0; i<=this.grid.gridAxis-1; i++){
+                for (int j = 0; j<=this.grid.gridAxis-1; j++){
+                    if (this.grid.grid[i][j].chance>highest)
+                    highest = this.grid.grid[i][j].chance;
+                    place[0] = i;
+                    place[1] = j;
+                
+                }}    
+            if (highest>0){
+                System.out.println(highest);
+            }
+        /*Random random = new Random();
         int x= random.nextInt(this.grid.gridAxis);
         int y= random.nextInt(this.grid.gridAxis);
         int b= random.nextInt(3);
         String a="REVEAL";
-        return new RetVal(x, y, a);
+        */
+        return new RetVal(place[0], place[1], "flag");
     }
     class RetVal{
         int x;
@@ -100,10 +117,18 @@ public class MineSweeper {
     }
 
     
-    
+    public void highChance(Square center){
+        for(Square next: center.connections){
+            next.chance += Character.getNumericValue(center.nature);
+        }
+    }
 
     public void adjustGrid(int[] squarePlace, String act) {
         Square mySquare = this.grid.grid[squarePlace[0]][squarePlace[1]];
+        if (this.firstMove){
+            mySquare.nature = ' ';
+            this.firstMove = !this.firstMove;
+        }
         if (act.equals("REVEAL")) {
             mySquare.revealed = 1;
             ArrayList<Square> visited = new ArrayList<Square>();
