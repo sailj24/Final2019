@@ -5,7 +5,7 @@ import java.util.Random;
 public class MineSweeper {
 
     int counter; // counts down
-    int timer; 
+    int timer;
     Grid grid;
     boolean firstMove;
 
@@ -50,13 +50,13 @@ public class MineSweeper {
     public void computerPlay(Scanner scanner) {
         while (this.checkGameOver().equals("still alive")) {
             this.timer++;
-            this.grid.toString();
+           /* this.grid.toString();
             System.out.println("Next Computer Move?");
             String hold = scanner.nextLine();
             if (hold.equals(" ")) {
                 System.out.println("ok");
-                this.decision();
-            }
+              */  this.decision();
+            
         }
         if (this.checkGameOver().equals("died")) {
             this.died();
@@ -70,13 +70,14 @@ public class MineSweeper {
         RetVal move;
         if (this.firstMove) {
             move = new RetVal((this.grid.gridAxis / 2), (this.grid.gridAxis / 2 + 1), "reveal");
+            System.out.println("FirstMove " + this.firstMove);
             this.firstMove = false;
         } else move = getMove();
         System.out.println(move.a + move.x + move.y);
         int[] actionPlace = { move.x, move.y };
         String action = move.a.toUpperCase();
         this.adjustGrid(actionPlace, action); // adjustGrid int[], string -> void, adjusts grid
-        
+
         System.out.println("done");
     }
 
@@ -85,127 +86,181 @@ public class MineSweeper {
         ArrayList<Square> known = new ArrayList<Square>();
         ArrayList<Square> unknown = new ArrayList<Square>();
         this.sortKnowns(known, unknown);
-        System.out.println("sorted");
-        for (Square s: known){
-            if (s.revealed ==2){//if flagged
+        //System.out.println("sorted");
+        for (Square s : known) {
+            if (s.revealed == 2) {// if flagged
                 this.foundOne(s);
             }
-            if (s.neighborBombs>0){
-                if (s.neighborBombs == this.bombsFound(s)){ //if all its neighborbombs are counted
+            if (s.neighborBombs > 0) {
+                if (s.neighborBombs == this.bombsFound(s)) { // if all its neighborbombs are counted
                     this.powerOfBomb(s);
-                } 
-               this.highChance(s); 
+                }
+                this.highChance(s);
             }
             
         }
-       // for (Square s: unknown){
-          //  System.out.println(s.nature);
-        //}
+      /*  System.out.println("These are the known:");
+        for (Square s: known){
+            System.out.println(s.nature + " " + s.chance);
+        }
+        System.out.println("These are the unknown:");
+        for (Square s: unknown){
+            System.out.println(s.nature + " " + s.chance);
+        }*/
+        // for (Square s: unknown){
+        // System.out.println(s.nature);
+        // }
         boolean readyToClick = false;
         boolean readyToFlag = false;
         int id = 0;
-        for (Square s: unknown){
-            System.out.println(s.chance);
-            if (s.chance >=s.connections.size()){
+        int figuredOut = 0;
+        for (Square s : unknown) {
+           // System.out.println(s.chance);
+            if (s.chance >= s.connections.size()) {
                 readyToFlag = true;
                 id = s.ID;
-                System.out.println("Got a bomb to flag");
+               // System.out.println("Got a bomb to flag");
                 break;
-            } else if (s.chance==0){
-                readyToClick=true;
+            } else if (s.chance == 0) {
+                readyToClick = true;
                 id = s.ID;
-                System.out.println("Got a space to click");
+               // System.out.println("Got a space to click");
                 break;
-            } 
-        }//figured out by now if we should be looking for something to click or flag
+            } else if (s.chance > 8) {
+                figuredOut++; // there are a enough big numbers in the list of unknown squares to imagine
+                              // you've figured out where all the bombs are
+            }
+        }
+        // figured out by now if we should be looking for something to click or flag
         this.resetAll();
-        if (readyToClick){
+        if (readyToClick) {
             int[] coord = findInGrid(id);
             RetVal rv = new RetVal(coord[0], coord[1], "reveal");
             return rv;
-        } else if (readyToFlag){
+        } else if (readyToFlag) {
             int[] coord = findInGrid(id);
             RetVal rv = new RetVal(coord[0], coord[1], "flag");
             return rv;
+        } else if (figuredOut == this.counter) {
+            int ident = this.clickTheRest(unknown);
+            int[] coord = findInGrid(ident);
+            RetVal rv = new RetVal(coord[0], coord[1], "reveal");
+            return rv;
         } else {
             int randid = this.randomlyChoose(unknown);
+            if (this.tooCloseToCivilization(new RetVal(this.findInGrid(randid)[0],this.findInGrid(randid)[1], "reveal"))){
+                randid = this.randomlyChoose(unknown);
+            }
             int[] coord = findInGrid(randid);
             RetVal rv = new RetVal(coord[0], coord[1], "reveal");
             System.out.println("At a loss here, boss");
             return rv;
         }
-         
-    } //////t/////////////////////////////////////////////////////////////////////////////////////////////////
-    public int bombsFound(Square s){
+
+    } ////// t/////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public int bombsFound(Square s) {
         int count = 0;
-        for (Square neighbor: s.connections){
-            if (neighbor.revealed==2){
+        for (Square neighbor : s.connections) {
+            if (neighbor.revealed == 2) {
                 count++;
             }
         }
         return count;
     }
+
     public void powerOfBomb(Square center) {
         for (Square next : center.connections) {
-            if (next.revealed==2){
-            next.chance=0;
-            System.out.println("I'm a badass");
+            if (next.revealed == 2) {
+                next.chance = 0;
+                //System.out.println("I'm a badass");
             }
         }
     }
-    public void foundOne(Square center){
+
+    public int clickTheRest(ArrayList<Square> list) {// blitzkrieg last move
+        int rv = 0;
+        for (Square s : list) {
+            if (s.chance < 8) {
+                rv = s.ID;
+            }
+        }
+        return rv;
+    }
+
+    public void foundOne(Square center) {
         for (Square next : center.connections) {
             next.chance--;
         }
     }
-    public void highChance(Square center) { 
+
+    public void highChance(Square center) {
         for (Square next : center.connections) {
             next.chance += center.neighborBombs;
         }
     }
-    public int[] findInGrid(int s){
+
+    public int[] findInGrid(int s) {
         int[] rv = new int[2];
         for (int i = 0; i <= this.grid.gridAxis - 1; i++) {
             for (int j = 0; j <= this.grid.gridAxis - 1; j++) {
-                if (this.grid.grid[i][j].ID==s){
-                    rv[0]=i;
-                    rv[1]=j;
+                if (this.grid.grid[i][j].ID == s) {
+                    rv[0] = i;
+                    rv[1] = j;
                 }
             }
         }
         return rv;
     }
-    public int randomlyChoose(ArrayList<Square> unknown){
-    Random rand = new Random();
-    int idx = rand.nextInt(unknown.size()-1);
-    int rv = unknown.get(idx).ID;
-    return rv;
+
+    public int randomlyChoose(ArrayList<Square> unknown) {
+        if (unknown.size()>=3){
+            Random rand = new Random();
+            int idx = rand.nextInt(unknown.size() - 1);
+            int rv = unknown.get(idx).ID;
+            return rv;
+        } else {
+            int c = 1;
+            for (Square s:unknown){
+                if (s.chance>1) continue;
+                else{
+                    c=s.ID;
+                }
+            } return c;
+        }
     }
-    public void resetAll(){
+
+    public void resetAll() {
         for (int i = 0; i <= this.grid.gridAxis - 1; i++) {
             for (int j = 0; j <= this.grid.gridAxis - 1; j++) {
                 this.grid.grid[i][j].chance = 0;
             }
         }
     }
-    public void sortKnowns (ArrayList<Square> known, ArrayList<Square> unknown){
+
+    public void sortKnowns(ArrayList<Square> known, ArrayList<Square> unknown) {
         for (int i = 0; i <= this.grid.gridAxis - 1; i++) {
             for (int j = 0; j <= this.grid.gridAxis - 1; j++) {
-                if (this.grid.grid[i][j].revealed==0){
+                if (this.grid.grid[i][j].revealed == 0) {
                     unknown.add(this.grid.grid[i][j]);
-                } else known.add(this.grid.grid[i][j]);
+                } else
+                    known.add(this.grid.grid[i][j]);
             }
         }
     }
-    public boolean tooCloseToCivilization(RetVal choice){
+
+    public boolean tooCloseToCivilization(RetVal choice) {
         boolean rv = false;
         Square s = this.grid.grid[choice.x][choice.y];
-        for (int i=0; i<s.connections.size(); i++){
-            if (s.connections.get(i).revealed == 0) continue;
-            else rv=true;
+        for (int i = 0; i < s.connections.size(); i++) {
+            if (s.connections.get(i).revealed == 0)
+                continue;
+            else
+                rv = true;
         }
         return rv;
     }
+
     class RetVal {
         int x;
         int y;
@@ -217,7 +272,6 @@ public class MineSweeper {
             a = act;
         }
     }
-
 
     public void adjustGrid(int[] squarePlace, String act) {
         Square mySquare = this.grid.grid[squarePlace[0]][squarePlace[1]];
@@ -232,10 +286,10 @@ public class MineSweeper {
             mySquare.changeAllBlankFriends(visited);
             System.out.println("changed all blanks");
         } else if (act.equals("FLAG")) {
-            if (mySquare.revealed==2){
+            if (mySquare.revealed == 2) {
                 mySquare.revealed = 0;
                 this.counter++;
-            } else{
+            } else {
                 mySquare.revealed = 2;
                 this.counter--;
             }
@@ -279,7 +333,7 @@ public class MineSweeper {
                     rv = "died";
                     allClicked = false;
                     break;
-                } else if (thisSquare.revealed==2 && thisSquare.nature == ' ') {
+                } else if (thisSquare.revealed == 2 && thisSquare.nature == ' ') {
                     allClicked = false;
                     rv = "still alive";
                 } else if (thisSquare.revealed == 0 || thisSquare.revealed == 3) {
