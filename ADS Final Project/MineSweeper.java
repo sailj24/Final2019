@@ -1,4 +1,4 @@
-import java.util.ArrayList;
+import java.util.*;
 import java.util.Scanner;
 import java.util.Random;
 
@@ -50,13 +50,13 @@ public class MineSweeper {
     public void computerPlay(Scanner scanner) {
         while (this.checkGameOver().equals("still alive")) {
             this.timer++;
-            /*this.grid.toString();
+            this.grid.toString();
             System.out.println("Next Computer Move?");
             String hold = scanner.nextLine();
             if (hold.equals(" ")) {
-                System.out.println("ok");*/
+                System.out.println("ok");
                 this.decision();
-                
+            }
         }
         if (this.checkGameOver().equals("died")) {
             this.died();
@@ -67,7 +67,10 @@ public class MineSweeper {
     }
 
     public void decision() {
-        RetVal move = getMove();
+        RetVal move;
+        if (this.firstMove) {
+            move = new RetVal((this.grid.gridAxis / 2), (this.grid.gridAxis / 2 + 1), "reveal");
+        } else move = getMove();
         System.out.println(move.a + move.x + move.y);
         int[] actionPlace = { move.x, move.y };
         String action = move.a.toUpperCase();
@@ -75,62 +78,80 @@ public class MineSweeper {
         System.out.println("done");
     }
 
-    public RetVal getMove() {
+    public RetVal getMove() { //////////////////////////////////////////////////////////////////////////////////////
         // ...decision-making...
-        if (this.firstMove) {
-            return new RetVal((this.grid.gridAxis / 2), (this.grid.gridAxis / 2 + 1), "reveal");
-        }
-        for (int i = 0; i <= this.grid.gridAxis - 1; i++) {
-            for (int j = 0; j <= this.grid.gridAxis - 1; j++) {// for every real square
-                Square s = this.grid.grid[i][j];
-                if (s.revealed == 1) {
-                    this.highChance(s);
-                } else if (s.revealed == 2) {
-                    this.lowChance(s);
-                }
+        ArrayList<Square> known = new ArrayList<Square>();
+        ArrayList<Square> unknown = new ArrayList<Square>();
+        this.sortKnowns(known, unknown);
+        for (Square s: known){
+            if (s.revealed ==2){//if flagged
+                this.foundOne(s);
+            }
+            if (s.neighborBombs>0){
+               this.highChance(s); 
             }
         }
-        int highest = 0;
-        int[] place = new int[2];
+        Square lowest = this.findLowest(unknown);
+        int[] coord = this.findInGrid(lowest);
+        RetVal rv = new RetVal (coord[0], coord[1], "reveal");
+        return rv;
+    } //////t/////////////////////////////////////////////////////////////////////////////////////////////////
+    public Square findLowest(ArrayList<Square> list){
+        int lowest = 0;
+        Square bestChoice=new Square(' ', 0);
+        for (Square s: list){
+            if (s.chance < lowest){
+                lowest = s.chance;
+                bestChoice = s;
+            }
+        } 
+        return bestChoice;
+    }
+    public void lowChance(Square center) {
+        for (Square next : center.connections) {
+            next.chance = next.chance - 1;
+        }
+    }
+    public void foundOne(Square center){
+        for (Square next : center.connections) {
+            next.chance--;
+        }
+    }
+    public void highChance(Square center) { 
+        for (Square next : center.connections) {
+            next.chance += center.neighborBombs;
+        }
+    }
+    public int[] findInGrid(Square s){
+        int[] rv = new int[2];
         for (int i = 0; i <= this.grid.gridAxis - 1; i++) {
             for (int j = 0; j <= this.grid.gridAxis - 1; j++) {
-                if (this.grid.grid[i][j].chance > highest && this.grid.grid[i][j].revealed == 0) {
-                    highest = this.grid.grid[i][j].chance;
-                    place[0] = i;
-                    place[1] = j;
+                if (this.grid.grid[i][j].equals(s)){
+                    rv[0]=i;
+                    rv[1]=j;
                 }
             }
         }
-        if (highest > 0) {
-            System.out.println(highest);
-            return new RetVal(place[0], place[1], "flag");
-
-        }
-        int lowest = 0;
-        if (highest <= 0) {
-            for (int i = 0; i <= this.grid.gridAxis - 1; i++) {
-                for (int j = 0; j <= this.grid.gridAxis - 1; j++) {
-                    if (this.grid.grid[i][j].chance < highest && this.grid.grid[i][j].revealed == 0) {
-                        lowest = this.grid.grid[i][j].chance;
-                        place[0] = i;
-                        place[1] = j;
-                    }
-                }
-            }
-        }
-        if (lowest < 0) {
-            System.out.println(lowest);
-            return new RetVal(place[0], place[1], "reveal");
-        } else {
-            Random random = new Random();
-            int x = random.nextInt(this.grid.gridAxis);
-            int y = random.nextInt(this.grid.gridAxis);
-            String a = "REVEAL";
-            return new RetVal(x, y, a);
-        }
-
+        return rv;
     }
-
+    public void sortKnowns (ArrayList<Square> known, ArrayList<Square> unknown){
+        for (int i = 0; i <= this.grid.gridAxis - 1; i++) {
+            for (int j = 0; j <= this.grid.gridAxis - 1; j++) {
+                if (this.grid.grid[i][j].revealed==0){
+                    unknown.add(this.grid.grid[i][j]);
+                } else known.add(this.grid.grid[i][j]);
+            }
+        }
+    }
+    public boolean tooCloseToCivilization(RetVal choice){
+        boolean rv = false;
+        Square s = this.grid.grid[choice.x][choice.y];
+        for (int i=0; i<s.connections.size(); i++){
+            if (s.connections.get(i).revealed == 0) continue;
+            else rv=true;
+        }
+        return rv;
+    }
     class RetVal {
         int x;
         int y;
@@ -143,17 +164,6 @@ public class MineSweeper {
         }
     }
 
-    public void lowChance(Square center) {
-        for (Square next : center.connections) {
-            next.chance = next.chance - 1;
-        }
-    }
-
-    public void highChance(Square center) {
-        for (Square next : center.connections) {
-            next.chance += Character.getNumericValue(center.nature);
-        }
-    }
 
     public void adjustGrid(int[] squarePlace, String act) {
         Square mySquare = this.grid.grid[squarePlace[0]][squarePlace[1]];
@@ -210,6 +220,9 @@ public class MineSweeper {
                     rv = "died";
                     allClicked = false;
                     break;
+                } else if (thisSquare.revealed==2 && thisSquare.nature == ' ') {
+                    allClicked = false;
+                    rv = "still alive";
                 } else if (thisSquare.revealed == 0 || thisSquare.revealed == 3) {
                     allClicked = false;
                     rv = "still alive";

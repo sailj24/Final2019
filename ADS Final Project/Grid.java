@@ -45,7 +45,8 @@ public class Grid {
                 for (int i = 0; i<=this.gridAxis-1; i++){
                     for (int j = 0; j<=this.gridAxis-1; j++){ //goes through every item in the grid
                                 if (this.grid[i][j] == null){
-                                    this.grid[i][j] = new Square(' ');//makes a square object and puts it in the grid
+                                    int place = this.listLocation(i, j);
+                                    this.grid[i][j] = new Square(' ', place);//makes a square object and puts it in the grid
                         }
                     }
                 }
@@ -64,7 +65,7 @@ public class Grid {
             int aNumx = gridLocation(aNum)[0];
             int aNumy = gridLocation(aNum)[1];
             if (this.grid[aNumx][aNumy] == null) {
-                this.grid[aNumx][aNumy] = new Square('*');
+                this.grid[aNumx][aNumy] = new Square('*', aNum);
                 //System.out.println("Hi, I'm a bomb");
                 randNums.add(aNum);
                 flag = randNums.size() == this.bombNum;

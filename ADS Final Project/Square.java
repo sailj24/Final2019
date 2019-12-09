@@ -1,14 +1,15 @@
 import java.util.ArrayList;
 
 public class Square {
-
-    char nature; 
+    int ID;
+    char nature;
     int revealed;
     ArrayList<Square> connections = new ArrayList<>();
     int neighborBombs;
     int chance;
 
-    public Square(char nat){
+    public Square(char nat, int place){
+        ID = place;
         nature = nat; //either bomb '*' or space ' '
         revealed = 0; // 0 is hasn't yet been tampered w/, 
                         //1 is clicked
@@ -46,5 +47,7 @@ public class Square {
             }
         }
     }
-
+    public boolean equals(Square s){
+        return this.ID == s.ID;
+    }
 }//closes class
