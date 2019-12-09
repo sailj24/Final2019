@@ -91,19 +91,22 @@ public class MineSweeper {
                 this.foundOne(s);
             }
             if (s.neighborBombs>0){
-                if (s.neighborBombs ==1){
-                    this.powerOfOne(s);
+                if (s.neighborBombs == this.bombsFound(s)){ //if all its neighborbombs are counted
+                    this.powerOfBomb(s);
                 } 
                this.highChance(s); 
             }
             
         }
+       // for (Square s: unknown){
+          //  System.out.println(s.nature);
+        //}
         boolean readyToClick = false;
         boolean readyToFlag = false;
         int id = 0;
         for (Square s: unknown){
             System.out.println(s.chance);
-            if (s.chance >=8){
+            if (s.chance >=s.connections.size()){
                 readyToFlag = true;
                 id = s.ID;
                 System.out.println("Got a bomb to flag");
@@ -133,12 +136,20 @@ public class MineSweeper {
         }
          
     } //////t/////////////////////////////////////////////////////////////////////////////////////////////////
-    
-    public void powerOfOne(Square center) {
+    public int bombsFound(Square s){
+        int count = 0;
+        for (Square neighbor: s.connections){
+            if (neighbor.revealed==2){
+                count++;
+            }
+        }
+        return count;
+    }
+    public void powerOfBomb(Square center) {
         for (Square next : center.connections) {
             if (next.revealed==2){
             next.chance=0;
-            System.out.println("I'm a badass 1");
+            System.out.println("I'm a badass");
             }
         }
     }
