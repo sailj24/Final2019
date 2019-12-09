@@ -70,11 +70,13 @@ public class MineSweeper {
         RetVal move;
         if (this.firstMove) {
             move = new RetVal((this.grid.gridAxis / 2), (this.grid.gridAxis / 2 + 1), "reveal");
+            this.firstMove = false;
         } else move = getMove();
         System.out.println(move.a + move.x + move.y);
         int[] actionPlace = { move.x, move.y };
         String action = move.a.toUpperCase();
         this.adjustGrid(actionPlace, action); // adjustGrid int[], string -> void, adjusts grid
+        
         System.out.println("done");
     }
 
@@ -83,33 +85,61 @@ public class MineSweeper {
         ArrayList<Square> known = new ArrayList<Square>();
         ArrayList<Square> unknown = new ArrayList<Square>();
         this.sortKnowns(known, unknown);
+        System.out.println("sorted");
         for (Square s: known){
             if (s.revealed ==2){//if flagged
                 this.foundOne(s);
             }
             if (s.neighborBombs>0){
+                if (s.neighborBombs ==1){
+                    this.powerOfOne(s);
+                } 
                this.highChance(s); 
             }
+            
         }
-        Square lowest = this.findLowest(unknown);
-        int[] coord = this.findInGrid(lowest);
-        RetVal rv = new RetVal (coord[0], coord[1], "reveal");
-        return rv;
+        boolean readyToClick = false;
+        boolean readyToFlag = false;
+        int id = 0;
+        for (Square s: unknown){
+            System.out.println(s.chance);
+            if (s.chance >=8){
+                readyToFlag = true;
+                id = s.ID;
+                System.out.println("Got a bomb to flag");
+                break;
+            } else if (s.chance==0){
+                readyToClick=true;
+                id = s.ID;
+                System.out.println("Got a space to click");
+                break;
+            } 
+        }//figured out by now if we should be looking for something to click or flag
+        this.resetAll();
+        if (readyToClick){
+            int[] coord = findInGrid(id);
+            RetVal rv = new RetVal(coord[0], coord[1], "reveal");
+            return rv;
+        } else if (readyToFlag){
+            int[] coord = findInGrid(id);
+            RetVal rv = new RetVal(coord[0], coord[1], "flag");
+            return rv;
+        } else {
+            int randid = this.randomlyChoose(unknown);
+            int[] coord = findInGrid(randid);
+            RetVal rv = new RetVal(coord[0], coord[1], "reveal");
+            System.out.println("At a loss here, boss");
+            return rv;
+        }
+         
     } //////t/////////////////////////////////////////////////////////////////////////////////////////////////
-    public Square findLowest(ArrayList<Square> list){
-        int lowest = 0;
-        Square bestChoice=new Square(' ', 0);
-        for (Square s: list){
-            if (s.chance < lowest){
-                lowest = s.chance;
-                bestChoice = s;
-            }
-        } 
-        return bestChoice;
-    }
-    public void lowChance(Square center) {
+    
+    public void powerOfOne(Square center) {
         for (Square next : center.connections) {
-            next.chance = next.chance - 1;
+            if (next.revealed==2){
+            next.chance=0;
+            System.out.println("I'm a badass 1");
+            }
         }
     }
     public void foundOne(Square center){
@@ -122,17 +152,30 @@ public class MineSweeper {
             next.chance += center.neighborBombs;
         }
     }
-    public int[] findInGrid(Square s){
+    public int[] findInGrid(int s){
         int[] rv = new int[2];
         for (int i = 0; i <= this.grid.gridAxis - 1; i++) {
             for (int j = 0; j <= this.grid.gridAxis - 1; j++) {
-                if (this.grid.grid[i][j].equals(s)){
+                if (this.grid.grid[i][j].ID==s){
                     rv[0]=i;
                     rv[1]=j;
                 }
             }
         }
         return rv;
+    }
+    public int randomlyChoose(ArrayList<Square> unknown){
+    Random rand = new Random();
+    int idx = rand.nextInt(unknown.size()-1);
+    int rv = unknown.get(idx).ID;
+    return rv;
+    }
+    public void resetAll(){
+        for (int i = 0; i <= this.grid.gridAxis - 1; i++) {
+            for (int j = 0; j <= this.grid.gridAxis - 1; j++) {
+                this.grid.grid[i][j].chance = 0;
+            }
+        }
     }
     public void sortKnowns (ArrayList<Square> known, ArrayList<Square> unknown){
         for (int i = 0; i <= this.grid.gridAxis - 1; i++) {
