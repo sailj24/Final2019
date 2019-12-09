@@ -178,8 +178,13 @@ public class MineSweeper {
             mySquare.changeAllBlankFriends(visited);
             System.out.println("changed all blanks");
         } else if (act.equals("FLAG")) {
-            mySquare.revealed = 2;
-            this.counter--;
+            if (mySquare.revealed==2){
+                mySquare.revealed = 0;
+                this.counter++;
+            } else{
+                mySquare.revealed = 2;
+                this.counter--;
+            }
         } else if (act.equals("?")) {
             mySquare.revealed = 3;
         }
