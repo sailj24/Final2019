@@ -10,14 +10,18 @@ public class MineSweeper {
     boolean firstMove;
 
     public MineSweeper() { // default constructor calls parameterized constructor
+<<<<<<< HEAD
         this(13);
+=======
+        this(5);
+>>>>>>> parent of 4e6fa64... AI 1.1, actually wins
     }
 
     public MineSweeper(int bombCount) { // parameterized constructor
-        counter = bombCount - 1;
+        counter = bombCount-1;
         timer = 0;
         grid = new Grid(bombCount);
-        firstMove = true;
+        firstMove=true;
     }
 
     public void play(Scanner scanner) {
@@ -35,7 +39,7 @@ public class MineSweeper {
             action = scanner.nextLine().toUpperCase();
 
             if (this.actIsLegal(action) && this.squareIsLegal(actionPlace)) {
-                // System.out.println("Legal move");
+               // System.out.println("Legal move");
                 this.adjustGrid(actionPlace, action); // adjustGrid int[], string -> void, adjusts grid
             } else
                 continue;
@@ -46,14 +50,14 @@ public class MineSweeper {
             this.won();
         }
     }
-
+    
     public void computerPlay(Scanner scanner) {
         while (this.checkGameOver().equals("still alive")) {
             this.timer++;
            /* this.grid.toString();
             System.out.println("Next Computer Move?");
             String hold = scanner.nextLine();
-            if (hold.equals(" ")) {
+            if (hold.equals(" ")){
                 System.out.println("ok");
               */  this.decision();
             
@@ -65,6 +69,7 @@ public class MineSweeper {
         }
         System.out.println(this.timer + " moves");
     }
+<<<<<<< HEAD
 
     public void decision() {
         RetVal move;
@@ -72,13 +77,18 @@ public class MineSweeper {
             move = new RetVal((this.grid.gridAxis / 2), (this.grid.gridAxis / 2 + 1), "reveal");
             System.out.println("FirstMove " + this.firstMove);
         } else move = getMove();
+=======
+    public void decision(ArrayList<Square> flagList){
+        RetVal move = getMove(flagList);
+>>>>>>> parent of 4e6fa64... AI 1.1, actually wins
         System.out.println(move.a + move.x + move.y);
-        int[] actionPlace = { move.x, move.y };
+        int[] actionPlace = {move.x,move.y};
         String action = move.a.toUpperCase();
         this.adjustGrid(actionPlace, action); // adjustGrid int[], string -> void, adjusts grid
 
         System.out.println("done");
     }
+<<<<<<< HEAD
 
     public RetVal getMove() { //////////////////////////////////////////////////////////////////////////////////////
         // ...decision-making...
@@ -258,24 +268,70 @@ public class MineSweeper {
                 rv = true;
         }
         return rv;
+=======
+    public RetVal getMove(ArrayList<Square> fList){
+        //...decision-making...
+        if (this.firstMove){
+            return new RetVal((this.grid.gridAxis/2),(this.grid.gridAxis/2+1), "reveal");
+        }
+        for (int i = 0; i<=this.grid.gridAxis-1; i++){
+            for (int j = 0; j<=this.grid.gridAxis-1; j++){//for every real square
+                Square s = this.grid.grid[i][j];
+                if (s.revealed==1){
+                    this.highChance(s);
+            }}}
+            int highest = 0;
+            int[] place = new int[2];
+            for (int i = 0; i<=this.grid.gridAxis-1; i++){
+                for (int j = 0; j<=this.grid.gridAxis-1; j++){
+                    if (this.grid.grid[i][j].chance>highest)
+                    highest = this.grid.grid[i][j].chance;
+                    place[0] = i;
+                    place[1] = j;
+                
+                }}    
+            if (highest>0){
+                System.out.println(highest);
+            }
+        /*Random random = new Random();
+        int x= random.nextInt(this.grid.gridAxis);
+        int y= random.nextInt(this.grid.gridAxis);
+        int b= random.nextInt(3);
+        String a="REVEAL";
+        */
+        return new RetVal(place[0], place[1], "flag");
+>>>>>>> parent of 4e6fa64... AI 1.1, actually wins
     }
-
-    class RetVal {
+    class RetVal{
         int x;
         int y;
         String a;
 
+<<<<<<< HEAD
         public RetVal(int i, int j, String act) {
             x = i;
             y = j;
             a = act;
+=======
+        public RetVal(int i, int j, String act){
+            x=i;
+            y=j;
+            a=act;
+        }
+    }
+
+    
+    public void highChance(Square center){
+        for(Square next: center.connections){
+            next.chance += Character.getNumericValue(center.nature);
+>>>>>>> parent of 4e6fa64... AI 1.1, actually wins
         }
     }
 
     public void adjustGrid(int[] squarePlace, String act) {
         Square mySquare = this.grid.grid[squarePlace[0]][squarePlace[1]];
-        if (this.firstMove) {
-            mySquare.nature = (char) mySquare.neighborBombs;
+        if (this.firstMove){
+            mySquare.nature = ' ';
             this.firstMove = !this.firstMove;
         }
         if (act.equals("REVEAL")) {
@@ -299,7 +355,7 @@ public class MineSweeper {
 
     public boolean actIsLegal(String act) {
         if ((act.equals("FLAG")) || (act.equals("REVEAL")) || (act.equals("?"))) {
-            // System.out.println("legal act");
+           // System.out.println("legal act");
             return true;
         } else {
             System.out.println("illegal act");
@@ -309,7 +365,7 @@ public class MineSweeper {
 
     public boolean squareIsLegal(int[] sq) {
         if ((sq[0] <= this.grid.gridAxis && sq[0] >= 0) && (sq[1] <= this.grid.gridAxis && sq[1] >= 0)) {
-            // System.out.println("legal place");
+            //System.out.println("legal place");
             return true;
         } else {
             System.out.println("illegal place");

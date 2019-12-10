@@ -33,7 +33,11 @@ public class Grid {
 
     public Grid(int num) {
         this.bombNum = num;
+<<<<<<< HEAD
         this.gridAxis = this.bombNum + 2;
+=======
+        this.gridAxis = 2 * this.bombNum;
+>>>>>>> parent of 4e6fa64... AI 1.1, actually wins
         this.gridSize = gridAxis * gridAxis;
         this.grid = new Square[gridAxis][gridAxis];
         makeGrid();
