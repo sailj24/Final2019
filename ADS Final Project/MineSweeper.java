@@ -120,10 +120,12 @@ public class MineSweeper {
         for (Square s : unknown) {
            // System.out.println(s.chance);
             if (s.chance >= s.connections.size()) {
+                if ((this.CoveredCount(s)<=s.neighborBombs) && (this.bombsFound(s)<=s.neighborBombs)){
                 readyToFlag = true;
                 id = s.ID;
-               // System.out.println("Got a bomb to flag");
                 break;
+                }
+               // System.out.println("Got a bomb to flag");
             } else if (s.chance == 0) {
                 readyToClick = true;
                 id = s.ID;
@@ -165,9 +167,14 @@ public class MineSweeper {
     public int bombsFound(Square s) {
         int count = 0;
         for (Square neighbor : s.connections) {
-            if (neighbor.revealed == 2) {
-                count++;
-            }
+            if (neighbor.revealed == 2) count++;
+        }
+        return count;
+    }
+    public int CoveredCount (Square s) {
+        int count = 0;
+        for (Square next: s.connections){
+            if (next.revealed==0) count++;
         }
         return count;
     }
