@@ -71,7 +71,6 @@ public class MineSweeper {
         if (this.firstMove) {
             move = new RetVal((this.grid.gridAxis / 2), (this.grid.gridAxis / 2 + 1), "reveal");
             System.out.println("FirstMove " + this.firstMove);
-            this.firstMove = false;
         } else move = getMove();
         System.out.println(move.a + move.x + move.y);
         int[] actionPlace = { move.x, move.y };
@@ -87,6 +86,10 @@ public class MineSweeper {
         ArrayList<Square> unknown = new ArrayList<Square>();
         this.sortKnowns(known, unknown);
         //System.out.println("sorted");
+        if (unknown.size()==0){
+            this.died();
+            System.exit(0);
+        }
         for (Square s : known) {
             if (s.revealed == 2) {// if flagged
                 this.foundOne(s);
@@ -172,13 +175,13 @@ public class MineSweeper {
     public void powerOfBomb(Square center) {
         for (Square next : center.connections) {
             if (next.revealed == 2) {
-                next.chance = 0;
+                next.chance = next.chance -center.neighborBombs;
                 //System.out.println("I'm a badass");
             }
         }
     }
 
-    public int clickTheRest(ArrayList<Square> list) {// blitzkrieg last move
+    public int clickTheRest(ArrayList<Square> list) {
         int rv = 0;
         for (Square s : list) {
             if (s.chance < 8) {
@@ -214,20 +217,9 @@ public class MineSweeper {
     }
 
     public int randomlyChoose(ArrayList<Square> unknown) {
-        if (unknown.size()>=3){
-            Random rand = new Random();
-            int idx = rand.nextInt(unknown.size() - 1);
-            int rv = unknown.get(idx).ID;
+            int rv = unknown.get(this.timer % unknown.size()).ID;
             return rv;
-        } else {
-            int c = 1;
-            for (Square s:unknown){
-                if (s.chance>1) continue;
-                else{
-                    c=s.ID;
-                }
-            } return c;
-        }
+       
     }
 
     public void resetAll() {
