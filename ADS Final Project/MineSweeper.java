@@ -3,26 +3,26 @@ import java.util.Scanner;
 
 public class MineSweeper {
 
-    int counter; // counts down
-    int timer;
-    Grid grid;
-    boolean firstMove;
+    int COUNTER; // counts down
+    int TIMER;
+    Grid BOARD;
+    boolean FIRST_MOVE;
 
     public MineSweeper() { // default constructor calls parameterized constructor
-        this(5);
+        this(7);//the one magic number--change this and the AI will likely have some problems. It's best at 7
     }
 
     public MineSweeper(int bombCount) { // parameterized constructor
-        counter = bombCount - 1;
-        timer = 0;
-        grid = new Grid(bombCount);
-        firstMove = true;
+        COUNTER = bombCount - 1;
+        TIMER = 0;
+        BOARD = new Grid(bombCount);
+        FIRST_MOVE = true;
     }
 
-    public void play(Scanner scanner) {//how a human plays
+    public void play(Scanner scanner) {// how a human plays
         while (this.checkGameOver().equals("still alive")) {
-            this.grid.toString();
-            System.out.println("Bombs hidden: " + this.counter);
+            this.BOARD.toString();
+            System.out.println("Bombs hidden: " + this.COUNTER);
             int[] actionPlace = new int[2];
             String action = "";
             System.out.println("Input where you want to click(x coordinate): ");
@@ -34,7 +34,7 @@ public class MineSweeper {
             action = scanner.nextLine().toUpperCase();
 
             if (this.actIsLegal(action) && this.squareIsLegal(actionPlace)) {
-                this.adjustGrid(actionPlace, action); // adjustGrid int[], string -> void, adjusts grid
+                this.adjustGrid(actionPlace, action); // adjustGrid int[], string -> void, adjusts BOARD
             } else
                 continue;
         }
@@ -47,14 +47,12 @@ public class MineSweeper {
 
     public void computerPlay(Scanner scanner) {
         while (this.checkGameOver().equals("still alive")) {
-            this.timer++;
-            //you can use the commented code below to watch the AI's move after each click
-            /*this.grid.toString();
-            System.out.println("Next Computer Move?");
-            String hold = scanner.nextLine();
-            if (hold.equals(" ")) {
-                System.out.println("ok");
-            */
+            this.TIMER++;
+            // you can use the commented code below to watch the AI's move after each click
+            /*
+             * this.BOARD.toString(); System.out.println("Next Computer Move?"); String hold
+             * = scanner.nextLine(); if (hold.equals(" ")) { System.out.println("ok");
+             */
             this.decision();
 
         }
@@ -63,12 +61,12 @@ public class MineSweeper {
         } else if (this.checkGameOver().equals("won")) {
             this.won();
         }
-        System.out.println(this.timer + " moves");
+        System.out.println(this.TIMER + " moves");
     }
 
     public void decision() {
-        if (this.firstMove) {
-            int[] firstClick = { this.grid.gridAxis / 3, this.grid.gridAxis / 2 };
+        if (this.FIRST_MOVE) {
+            int[] firstClick = { this.BOARD.GRID_AXIS / 3, this.BOARD.GRID_AXIS / 2 };
             this.adjustGrid(firstClick, "REVEAL");
             System.out.println("done");
             return;
@@ -78,66 +76,66 @@ public class MineSweeper {
         this.sortKnowns(known, unknown);
         boolean flag = false;
         int iterator = 0;
-        while (!flag && iterator<known.size()) {
-            Square s = known.get(iterator);
-            if (s.nature == '*') {
+        while (!flag && iterator < known.size()) {//keeps looping until arrives at a good move
+            Square s = known.get(iterator);//loops through all known squares(the blanks and numbers on the board)
+            if (s.NATURE == '*') {//this is flagged(known and '*')already
                 iterator++;
                 continue;
             }
-            if (this.corner(s, unknown)) {//case of if a square is connected to as many unrevealed squares as it is certain there are bombs around it
+            if (this.corner(s, unknown)) {// if a square is connected to as many unrevealed squares as it is
+                                          // certain there are bombs around it
                 int[] place = this.findCorner(s);
                 this.adjustGrid(place, "FLAG");
-                flag = true;
-                
-            }else if (this.safeMove(s, unknown)) {
+                flag = true;//yes, I know where to move
+            } else if (this.safeMove(s, unknown)) {// if a square is connected to enough revealed bombs
+                                                        //that the rest must not be bombs
                 int[] place = this.findCorner(s);
                 this.adjustGrid(place, "REVEAL");
-                flag = true;
+                flag = true;//yes, I know where to move
             }
-            if (iterator<known.size()){
+            if (iterator < known.size()) {
                 iterator++;
             } else {
-                System.out.println("I'm at a loss here, boss"); //this should never show ut it's just in case
+                System.out.println("I'm at a loss here, boss"); // this should never show but it's just in case
                 System.exit(0);
             }
-        
         }
-    
         if (flag)
-            System.out.println("I got through that click!");//the AI decided on a safe move
+            System.out.println("I got through that click!");// the AI decided on a safe move
         else {
-            System.out.println("I'm at a loss here, boss. For Real, this time");//The AI could not decide on a safe move
+            System.out.println("I'm at a loss here, boss. For Real, this time");// The AI could not decide on a safe
+                                                                                // move
             System.exit(0);
         }
 
     }
+
     public boolean safeMove(Square s, ArrayList<Square> unknown) {
-        if (s.neighborBombs == 0)
+        if (s.NEIGHBOR_BOMBS == 0)
             return false;
-        int neighborBs = s.neighborBombs;
+        int neighborBs = s.NEIGHBOR_BOMBS;
         int stillCovered = 0;
-        for (Square square : s.connections) {
-            if (square.revealed == 2) {
+        for (Square square : s.CONNECTIONS) {
+            if (square.REVEALED == 2) {
                 neighborBs--;
             }
-            if (square.revealed == 0) {
+            if (square.REVEALED == 0) {
                 stillCovered++;
             }
         }
-        return neighborBs==0 && stillCovered>0;
+        return neighborBs == 0 && stillCovered > 0;
     }
 
     public boolean corner(Square s, ArrayList<Square> unknown) {
-        if (s.neighborBombs == 0)
+        if (s.NEIGHBOR_BOMBS == 0)
             return false;
-        int neighborBs = s.neighborBombs;
+        int neighborBs = s.NEIGHBOR_BOMBS;
         int stillCovered = 0;
-        for (Square square : s.connections) {
-            if (square.revealed == 2) {
-                neighborBs-=2;
+        for (Square square : s.CONNECTIONS) {
+            if (square.REVEALED == 2) {
+                neighborBs -= 2;
             }
-           // System.out.println("Trying to decide if I'm a corner");
-            if (square.revealed == 0) {
+            if (square.REVEALED == 0) {
                 stillCovered++;
             }
         }
@@ -147,9 +145,9 @@ public class MineSweeper {
     public int[] findCorner(Square s) {
         int[] rv = new int[2];
         int iterator = 0;
-        while (iterator < s.connections.size()) {
-            Square neighbor = s.connections.get(iterator);
-            if (neighbor.revealed == 0) {
+        while (iterator < s.CONNECTIONS.size()) {
+            Square neighbor = s.CONNECTIONS.get(iterator);
+            if (neighbor.REVEALED == 0) {
                 rv = this.findInGrid(neighbor);
                 return rv;
             }
@@ -158,48 +156,47 @@ public class MineSweeper {
         return rv;
     }
 
-    public void sortKnowns(ArrayList<Square> k, ArrayList<Square> uk) {// sorts all squares into known and unknown
-                                                                       // (unnrevealed)
-        for (int i = 0; i <= this.grid.gridAxis - 1; i++) {
-            for (int j = 0; j <= this.grid.gridAxis - 1; j++) {
-                Square s = this.grid.grid[i][j];
-                if (s.revealed == 0) {
-                    uk.add(s);
+    public void sortKnowns(ArrayList<Square> k, ArrayList<Square> uk) {// sorts all squares into 2 lists
+        for (int i = 0; i <= this.BOARD.GRID_AXIS - 1; i++) {
+            for (int j = 0; j <= this.BOARD.GRID_AXIS - 1; j++) {
+                Square s = this.BOARD.GRID[i][j];
+                if (s.REVEALED == 0) {
+                    uk.add(s);//add unrevealed to unknown list
                 } else
-                    k.add(s);
+                    k.add(s);//add revealed to known list
             }
         }
     }
 
-    public void adjustGrid(int[] squarePlace, String act) {
-        Square mySquare = this.grid.grid[squarePlace[0]][squarePlace[1]];
-        if (this.firstMove) {
-            if (mySquare.nature == '*')
+    public void adjustGrid(int[] squarePlace, String act) {//makes sure the game changes with the move decision
+        Square mySquare = this.BOARD.GRID[squarePlace[0]][squarePlace[1]];
+        if (this.FIRST_MOVE) {//renders the first move innocuous (Part II)
+            if (mySquare.NATURE == '*')
                 this.changeFirstMove(mySquare);
             else
-                this.firstMove = false;
+                this.FIRST_MOVE = false;
         }
         if (act.equals("REVEAL")) {
-            mySquare.revealed = 1;
+            mySquare.REVEALED = 1;
             ArrayList<Square> visited = new ArrayList<Square>();
             visited.add(mySquare);
             mySquare.changeAllBlankFriends(visited);
         } else if (act.equals("FLAG")) {
-            if (mySquare.revealed == 2) {
-                mySquare.revealed = 0;
-                this.counter++;
+            if (mySquare.REVEALED == 2) {//allows you to unflag things if you need to
+                mySquare.REVEALED = 0;
+                this.COUNTER++;
             } else {
-                mySquare.revealed = 2;
-                this.counter--;
+                mySquare.REVEALED = 2;
+                this.COUNTER--;
             }
         } else if (act.equals("?")) {
-            mySquare.revealed = 3;
+            mySquare.REVEALED = 3;
         }
     }
 
     public boolean actIsLegal(String act) {
         if ((act.equals("FLAG")) || (act.equals("REVEAL")) || (act.equals("?"))) {
-             System.out.println("legal act");
+            System.out.println("legal act");
             return true;
         } else {
             System.out.println("illegal act");
@@ -208,8 +205,8 @@ public class MineSweeper {
     }
 
     public boolean squareIsLegal(int[] sq) {
-        if ((sq[0] <= this.grid.gridAxis && sq[0] >= 0) && (sq[1] <= this.grid.gridAxis && sq[1] >= 0)) {
-             System.out.println("legal place");
+        if ((sq[0] <= this.BOARD.GRID_AXIS && sq[0] >= 0) && (sq[1] <= this.BOARD.GRID_AXIS && sq[1] >= 0)) {
+            System.out.println("legal place");
             return true;
         } else {
             System.out.println("illegal place");
@@ -217,11 +214,11 @@ public class MineSweeper {
         }
     }
 
-    public int[] findInGrid(Square s) {
+    public int[] findInGrid(Square s) {//given a square ID, finds the x and y of it
         int[] rv = new int[2];
-        for (int i = 0; i <= this.grid.gridAxis - 1; i++) {
-            for (int j = 0; j <= this.grid.gridAxis - 1; j++) {
-                if (this.grid.grid[i][j].ID == s.ID) {
+        for (int i = 0; i <= this.BOARD.GRID_AXIS - 1; i++) {
+            for (int j = 0; j <= this.BOARD.GRID_AXIS - 1; j++) {
+                if (this.BOARD.GRID[i][j].ID == s.ID) {
                     rv[0] = i;
                     rv[1] = j;
                 }
@@ -230,28 +227,28 @@ public class MineSweeper {
         return rv;
     }
 
-    public void changeFirstMove(Square s) {
-        s.nature = (char)s.neighborBombs;
-        for (Square square : s.connections) {
-            square.neighborBombs--;
+    public void changeFirstMove(Square s) {//if click on bomb your first move, it's rendered innocuous
+        s.NATURE = (char) s.NEIGHBOR_BOMBS;
+        for (Square square : s.CONNECTIONS) {
+            square.NEIGHBOR_BOMBS--;
         }
-        this.firstMove = false;
+        this.FIRST_MOVE = false;
     }
 
-    public String checkGameOver() {
-        if (this.timer > 100) {
+    public String checkGameOver() {//win if all non-bombs are clicked, lose if a bomb is clicked. Else stay alive forever...
+        if (this.TIMER > 100) {//in case the AI is stubborn and struggling(unlikely)
             return "died";
         }
         String rv = "!!";
         boolean allClicked = true;
-        for (int i = 0; i <= this.grid.gridAxis - 1; i++) {
-            for (int j = 0; j <= this.grid.gridAxis - 1; j++) {
-                Square thisSquare = this.grid.grid[i][j];
-                if (thisSquare.revealed == 1 && thisSquare.nature == '*') {
+        for (int i = 0; i <= this.BOARD.GRID_AXIS - 1; i++) {
+            for (int j = 0; j <= this.BOARD.GRID_AXIS - 1; j++) {
+                Square thisSquare = this.BOARD.GRID[i][j];
+                if (thisSquare.REVEALED == 1 && thisSquare.NATURE == '*') {
                     rv = "died";
                     allClicked = false;
                     break;
-                } else if (thisSquare.revealed != 1 && thisSquare.nature != '*') {
+                } else if (thisSquare.REVEALED != 1 && thisSquare.NATURE != '*') {
                     allClicked = false;
                     rv = "still alive";
                 }
@@ -267,14 +264,14 @@ public class MineSweeper {
     }
 
     public void died() {
-        this.grid.toString();
+        this.BOARD.toString();
         System.out.println("U DYED. SORRY NOT SORRY");
     }
 
     public void won() {
-        this.grid.toString();
+        this.BOARD.toString();
         System.out.println("U WON. BIEN OUEJ");
         System.out.println("THAT MEANS WELL PLAYED");
     }
 
-}//That's all, folks
+}// That's all, folks
