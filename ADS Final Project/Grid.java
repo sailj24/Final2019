@@ -11,41 +11,17 @@ public class Grid {
         this(1);
     }// closes default constructor
     
-    /*saturdayGrid.calculateConnections();
-    public static void main(String[] args) {
-        Grid saturdayGrid = new Grid(5);
-        //System.out.println(saturdayGrid.toString());
-        // System.out.println(this.grid.gridAxis);
-        ArrayList<Square> visited = new ArrayList<Square>();
-        for (int i=0; i<=saturdayGrid.gridAxis-1; i++){
-            for (int j=0; j<=saturdayGrid.gridAxis-1; j++){
-                visited.add(saturdayGrid.grid[i][j]);
-                System.out.println("Before " + saturdayGrid.grid[i][j].nature);
-                System.out.println("neighborbombs " + saturdayGrid.grid[i][j].neighborBombs);
-                saturdayGrid.grid[i][j].changeAllBlankFriends(visited);
-                System.out.println("After " + saturdayGrid.grid[i][j].nature);
-            }
-
-        }
-        System.out.println("I'm done");
-    }
-    */
 
     public Grid(int num) {
         this.bombNum = num;
-<<<<<<< HEAD
-        this.gridAxis = this.bombNum + 2;
-=======
-        this.gridAxis = 2 * this.bombNum;
->>>>>>> parent of 4e6fa64... AI 1.1, actually wins
+        this.gridAxis = this.bombNum+2;
         this.gridSize = gridAxis * gridAxis;
         this.grid = new Square[gridAxis][gridAxis];
         makeGrid();
-    }// closes constructor
+    }// closes noisy constructor
 
     public void makeGrid(){
-                ArrayList<Integer> randomList = this.makeRandomList (); //makes the bomb objects and puts them in the grid
-        //System.out.println("Making the grid, man");
+                this.makeRandomList (); //makes the bomb objects and puts them in the grid
                 for (int i = 0; i<=this.gridAxis-1; i++){
                     for (int j = 0; j<=this.gridAxis-1; j++){ //goes through every item in the grid
                                 if (this.grid[i][j] == null){
@@ -57,9 +33,8 @@ public class Grid {
                 this.calculateConnections();
             }// closes makeGrid
 
-    public ArrayList<Integer> makeRandomList() { // because seriously, how hard is it to make a
+    public void makeRandomList() { // because seriously, how hard is it to make a
                                                                           // truly random bomb placement????
-        //System.out.println("Placing the bombs, man");
         Random rand = new Random();
         ArrayList<Integer> randNums = new ArrayList<>(); // the this.grid of all the places bombs will be; it is as long as
                                                          // the num of bombs we want
@@ -70,21 +45,18 @@ public class Grid {
             int aNumy = gridLocation(aNum)[1];
             if (this.grid[aNumx][aNumy] == null) {
                 this.grid[aNumx][aNumy] = new Square('*', aNum);
-                //System.out.println("Hi, I'm a bomb");
                 randNums.add(aNum);
                 flag = randNums.size() == this.bombNum;
             } else {
                 continue;
             }
         }
-        return randNums;
     }// closes makeRandomList
 
     public void calculateConnections(){ //allows the squares to know each other if touching
         for (int i = 0; i<=this.gridAxis-1; i++){
             for (int j = 0; j<=this.gridAxis-1; j++){//for every real square
                 for (int dy = -1; dy<=1; dy++){
-                    //System.out.println("I'm finding friends!");
                     for (int dx = -1; dx<=1; dx++){//for every potential neighbor
                         if (dx==0 && dy==0){
                             continue;
@@ -93,10 +65,8 @@ public class Grid {
                         int targety = j + dy;
                         if (targetx>=0 && targetx<=gridAxis-1 && targety>=0 && targety<=gridAxis-1){
                             this.grid[i][j].connections.add(this.grid[targetx][targety]); //consider it a neighbor
-                            //System.out.println("Neighbor");
                             if (this.grid[targetx][targety].nature == '*'){
                             this.grid[i][j].neighborBombs++;
-                            //System.out.println("neighborBombs++" + this.grid[i][j].neighborBombs);
                             }
                         }
                     }
@@ -105,10 +75,7 @@ public class Grid {
         }
     }
 
-    
-
     public String toString(){ //the image of the board
-       // System.out.println("Trying to toString");
         String rv = " ";
         for (int i = 0; i<=this.gridAxis-1; i++){
             if(i==0){
@@ -125,7 +92,6 @@ public class Grid {
             rv+="--\n";
             rv+="| " + i + " |";
             for (int j = 0; j<=this.gridAxis-1; j++){
-                //rv+= this.grid[i][j].nature + " |";
                 rv = this.toStringWithMoves(rv, i, j);
             }
         }
@@ -137,7 +103,6 @@ public class Grid {
                     rv+= " #|";
                  }else if (this.grid[i][j].revealed==1){
                     rv+= this.grid[i][j].nature + " |";
-                    //System.out.println(this.grid[i][j].nature);
                  }else if (this.grid[i][j].revealed==2){
                     rv+= "!!|";
                  }else if (this.grid[i][j].revealed==3){

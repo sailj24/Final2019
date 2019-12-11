@@ -6,7 +6,6 @@ public class Square {
     int revealed;
     ArrayList<Square> connections = new ArrayList<>();
     int neighborBombs;
-    int chance;
 
     public Square(char nat, int place){
         ID = place;
@@ -14,13 +13,12 @@ public class Square {
         revealed = 0; // 0 is hasn't yet been tampered w/, 
                         //1 is clicked
                         //2 is flagged
-                        //3 is ?ed
+                        //3 is ?ed 
         connections = new ArrayList<Square>();
         neighborBombs = 0;
-        chance = 0;//only for the ai
     }
 
-    public void changeAllBlankFriends(ArrayList<Square> visited){
+    public void changeAllBlankFriends(ArrayList<Square> visited){ //reveals blank spaces attatched to what you click
         visited.add(this);
         for (int i=0; i<=this.connections.size()-1; i++){
             if(connections.get(i).nature==' '){
