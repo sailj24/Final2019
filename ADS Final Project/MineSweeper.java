@@ -9,7 +9,7 @@ public class MineSweeper {
     boolean FIRST_MOVE;
 
     public MineSweeper() { // default constructor calls parameterized constructor
-        this();//the one magic number--change this and the AI will likely have some problems. It's best at 7
+        this(5);//the one magic number--change this and the AI will likely have some problems. It's best at 7
     }
 
     public MineSweeper(int bombCount) { // parameterized constructor
